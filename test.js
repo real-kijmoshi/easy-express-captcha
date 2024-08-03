@@ -1,5 +1,5 @@
 const express = require('express');
-const captcha = require('.');
+const captcha = require('easy-express-captcha');
 
 const app = express();
 
