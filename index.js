@@ -53,3 +53,5 @@ module.exports = (settings) => {
         next();
     };
 }
+
+module.exports.generator = gen;

@@ -29,11 +29,11 @@ const baseSettings = {
         characters: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     },
     noise: {
-        density: 0.03,
-        curveCount: 2
+        density: 0.3,
+        curveCount: 10
     },
     strokes: {
-        count: 4,
+        count: 10,
         width: 2
     }
 };

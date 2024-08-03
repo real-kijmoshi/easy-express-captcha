@@ -1,7 +1,9 @@
-<h1>
-    easy express captcha
-</h1>
+# easy-express-captcha
 
+![npm](https://img.shields.io/npm/v/easy-express-captcha)
+![npm](https://img.shields.io/npm/dt/easy-express-captcha)
+![NPM](https://img.shields.io/npm/l/easy-express-captcha)
+![GitHub last commit](https://img.shields.io/github/last-commit/real-kijmoshi/easy-express-captcha)
  
 easy express captcha is a simple captcha middleware for express.js. It uses custom captcha generation and verification to ensure fast and secure captcha generation and verification. It is easy to use and can be integrated into any express.js application with ease. It is also highly customizable and can be configured to suit your needs. It is perfect for protecting your forms from spam and bots.
 
@@ -23,7 +25,7 @@ app.use(captcha({
     captcha: {
         length: 5
     },
-    inputName: "captcha",
+    inputName: "captcha" //for more info check the options section
 }));
 
 app.get('/', (req, res) => {
