@@ -51,7 +51,7 @@ app.listen(3000, () => {
 ```
 
 ### Result
-![](/preview.png)
+![](https://raw.githubusercontent.com/real-kijmoshi/easy-express-captcha/main/preview.png)
 
 
 ## Options
