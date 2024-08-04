@@ -1,20 +1,26 @@
 const express = require('express');
-const captcha = require('easy-express-captcha');
-
+const captcha = require('.');
 const app = express();
 
 app.use(express.urlencoded({ extended: false }));
-
 app.use(captcha({
-    captcha: {
-        length: 5
+    generator: {
+        captcha: {
+            length: 5
+        },
+        strokes: {
+            count: 4,
+            width: 2
+        },
+        noise: {
+            density: 0.1
+        },
     },
-    inputName: "captcha",
+    inputName: "captcha" // For more info, check the options section
 }));
 
 app.get('/', (req, res) => {
     const captcha = req.generateCaptcha();
-
     res.send(`
         <form action="/submit" method="post">
             ${captcha}
@@ -31,6 +37,6 @@ app.post('/submit', (req, res) => {
     }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log('Server started');
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
 });

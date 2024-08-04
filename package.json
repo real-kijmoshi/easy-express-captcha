@@ -1,6 +1,6 @@
 {
   "name": "easy-express-captcha",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "description": "A simple captcha generator for express",
   "main": "index.js",
   "repository": {

@@ -33,7 +33,7 @@ const baseSettings = {
         curveCount: 10
     },
     strokes: {
-        count: 10,
+        count: 4,
         width: 2
     }
 };
@@ -103,18 +103,6 @@ function generateCaptcha(settings) {
         );
     }
 
-    ctx.lineWidth = settings.strokes.width;
-    for (let i = 0; i < settings.strokes.count; i++) {
-        ctx.strokeStyle = strokeColors[i % strokeColors.length];
-        drawCurvedLine(
-            ctx,
-            0,
-            Math.random() * settings.canvas.height,
-            settings.canvas.width,
-            Math.random() * settings.canvas.height
-        );
-    }
-
     ctx.font = settings.text.font;
     ctx.textBaseline = 'middle';
 
@@ -138,6 +126,18 @@ function generateCaptcha(settings) {
         currentX += Math.floor(Math.random() * (settings.captcha.spacing.max - settings.captcha.spacing.min + 1)) + settings.captcha.spacing.min;
     });
 
+    ctx.lineWidth = settings.strokes.width;
+    for (let i = 0; i < settings.strokes.count; i++) {
+        ctx.strokeStyle = strokeColors[i % strokeColors.length];
+        drawCurvedLine(
+            ctx,
+            0,
+            Math.random() * settings.canvas.height,
+            settings.canvas.width,
+            Math.random() * settings.canvas.height
+        );
+    }
+
     return {
         image: canvas.toDataURL(),
         text: captchaText
@@ -145,7 +145,7 @@ function generateCaptcha(settings) {
 }
 
 module.exports = {
-    svg: generateCaptcha,
+    generate: generateCaptcha,
     png: settings => {
         const captcha = generateCaptcha(settings);
         const base64Data = captcha.image.replace(/^data:image\/png;base64,/, "");
