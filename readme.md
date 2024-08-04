@@ -7,6 +7,8 @@
 
 Easy Express Captcha is a simple captcha middleware for Express.js. It uses custom captcha generation and verification to ensure fast and secure captcha handling. It's easy to integrate into any Express.js application and highly customizable to suit your needs. Perfect for protecting your forms from spam and bots.
 
+You can check the [demo](https://easy-express-captcha.onrender.com/) here.
+
 ## Installation
 
 ```bash

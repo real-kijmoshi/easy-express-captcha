@@ -89,8 +89,7 @@ module.exports = (settings) => {
 
         if(req.method === "POST" && req.body) {
             const { captchaId, captcha } = req.body;
-            console.log(req.body);
-
+            
             if(settings.honeypot.enabled) {
                 const honeypot = settings.honeypot.inputNames.some(name => req.body[name]?.length > 0);
                 
