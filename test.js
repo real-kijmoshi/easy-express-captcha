@@ -47,6 +47,16 @@ app.get('/', (req, res) => {
     `);
 });
 
+app.post('/submit', (req, res) => {
+    if(req.validCaptcha) {
+        res.send('Captcha is valid');
+    } else {
+        res.send(`Captcha is invalid: ${req.invalidReason}`);
+    }
+})
+
+
+
 
 app.get('/sandbox', (req, res) => {
     const settings = {
@@ -72,7 +82,9 @@ app.get('/sandbox', (req, res) => {
     res.send(`
         <form action="/submit" method="post">
             <img src="${captcha.image}" />
+            <input type="text" name="captcha" placeholder="Enter the code" />
             <button type="submit">Submit</button>
+            <span id="output"></span>
         </form>
 
         <div style="display: flex; flex-direction: column;">
@@ -111,6 +123,18 @@ app.get('/sandbox', (req, res) => {
 
                 window.location.href = "/sandbox?" + params.toString();
             })
+
+            const output = document.getElementById("output");
+            const captcha = document.getElementById("captcha");
+            document.querySelector("form").addEventListener("submit", e => {
+                e.preventDefault();
+                
+                if(captcha.value === "${captcha.text}") {
+                    output.textContent = "Captcha is valid";
+                } else {
+                    output.textContent = "Captcha is invalid";
+                }
+            });
         </script>
     `);
 });
