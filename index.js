@@ -1,16 +1,5 @@
 const gen = require("./generator");
 
-const codes = new Map();
-
-const uuidGen = () => {
-    let uuid = "";
-    
-    do {
-        uuid = Math.random().toString(36).substring(2, 8) + Math.random().toString(36).substring(2, 8);
-    } while (codes[uuid]);
-
-    return uuid;
-};
 
 const defaultSettings = {
     generator: {},
@@ -18,7 +7,11 @@ const defaultSettings = {
     honeypot: {
         enabled: false,
         inputNames: ["i am a robot"]
-    }
+    },
+    refresh: {
+        enabled: true,
+        path: "/refresh"
+    },
 };
 
 /**
@@ -52,7 +45,11 @@ Express middleware for captcha generation and validation.
 @param {Object} [settings.honeypot] - Honeypot field settings for bot detection.
 @param {boolean} [settings.honeypot.enabled=false] - Enable honeypot fields.
 @param {string[]} [settings.honeypot.inputNames=["i am a robot"]] - Names of honeypot input fields.
+@param {Object} refresh - Express route handler for refreshing the captcha image.
+@param {boolean} refresh.enabled - Enable the refresh route.
+@param {string} refresh.path - Path for the refresh route.
 @returns {Function} Express middleware function for captcha handling.
+@requires module:express-session
 */
 
 
@@ -60,13 +57,19 @@ module.exports = (settings) => {
     settings = { ...defaultSettings, ...settings };
     settings.honeypot = { ...defaultSettings.honeypot, ...settings.honeypot };
     settings.generator = { ...defaultSettings.generator, ...settings.generator };
+    settings.refresh = { enabled: false, path: "/refresh", ...settings.refresh };
+
 
     return (req, res, next) => {
         req.generateCaptcha = () => {
-            const id = uuidGen();
+            //test session
+            if(!req.session) {
+                throw new Error("express-session is required for captcha middleware");
+            }
+
             const captcha = gen.generate(settings.generator);
 
-            codes.set(id, captcha.text);
+            req.session.captcha = captcha.text;
 
             return `
                 <div class="captcha-container">
@@ -79,16 +82,49 @@ module.exports = (settings) => {
                             : ""
                     }
                     <input type="text" name="${settings.inputName}" placeholder="Enter the code" class="captcha-input" />
-                    <input type="hidden" name="captchaId" value="${id}" />
+                    ${
+                        settings.refresh.enabled ? `<button type="button" class="captcha-refresh">Refresh</button>` : ""
+                    }
+
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const refreshButton = document.querySelector(".captcha-refresh");
+
+                            if(refreshButton) {
+                                refreshButton.addEventListener("click", () => {
+                                    fetch("${settings.refresh.path}", { method: "POST" })
+                                        .then(res => res.blob())
+                                        .then(blob => blob.text())
+                                        .then(dataUrl => {
+                                            const image = document.querySelector(".captcha-image img");
+                                            image.src = dataUrl
+                                        });
+                                });
+                            }
+                        })
+                    </script>
                 </div>
             `;
         };
+
+        
+
+        if(settings.refresh.enabled && req.method === "POST" && req.path === settings.refresh.path) {
+            const captcha = gen.generate(settings.generator);
+
+            req.session.captcha = captcha.text;
+
+            res.setHeader("Content-Type", "image/png");
+            res.send(captcha.image);
+            res.end();
+            return;
+        }
 
         req.validCaptcha = false;
         req.invalidReason = "";
 
         if(req.method === "POST" && req.body) {
-            const { captchaId, captcha } = req.body;
+            const { captcha } = req.body;
             
             if(settings.honeypot.enabled) {
                 const honeypot = settings.honeypot.inputNames.some(name => req.body[name]?.length > 0);
@@ -99,18 +135,13 @@ module.exports = (settings) => {
                 }
             }
 
-            if(!captchaId || !captcha) {
+            if(!captcha) {
                 req.invalidReason = "Missing captcha";
                 next();
             }
 
-            const code = codes.get(captchaId);
-            if(!code) {
-                req.invalidReason = "Invalid captcha ID";
-                next();
-            }
-
-            if(captcha != code) {
+            
+            if(captcha != req.session.captcha) {
                 req.invalidReason = "Invalid captcha";
                 next();
             } else {
@@ -121,5 +152,6 @@ module.exports = (settings) => {
         next();
     };
 }
+
 
 module.exports.generator = gen;

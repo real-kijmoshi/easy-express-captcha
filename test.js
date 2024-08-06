@@ -1,35 +1,46 @@
-const express = require('express');
-const easyCaptcha = require('.');
+const express = require("express");
+const easyCaptcha = require(".");
+const session = require("express-session");
+
 const app = express();
 
+app.use(
+  session({
+    secret: process.env.SECRET ?? "secret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 app.use(express.urlencoded({ extended: false }));
-app.use(easyCaptcha({
+app.use(
+  easyCaptcha({
     generator: {
-        captcha: {
-            length: 5
-        },
-        strokes: {
-            count: 2,
-            width: 2
-        },
-        noise: {
-            density: 0.01
-        },
-        text: {
-            font: "bold 40px Roboto",
-            characters: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        },
+      captcha: {
+        length: 5,
+      },
+      strokes: {
+        count: 2,
+        width: 2,
+      },
+      noise: {
+        density: 0.01,
+      },
+      text: {
+        font: "bold 40px Roboto",
+        characters: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
+      },
     },
     honeypot: {
-        enabled: true,
-        inputNames: ["i am a robot"]
-    },
-    inputName: "captcha" // For more info, check the options section
-}));
+      enabled: true,
+      inputNames: ["i am a robot"],
+    }, // for more settings, check the options in readme
+  })
+);
 
-app.get('/', (req, res) => {
-    const captcha = req.generateCaptcha();
-    res.send(`
+app.get("/", (req, res) => {
+  const captcha = req.generateCaptcha();
+  res.send(`
         <form action="/submit" method="post">
             ${captcha}
             <button type="submit">Submit</button>
@@ -47,39 +58,37 @@ app.get('/', (req, res) => {
     `);
 });
 
-app.post('/submit', (req, res) => {
-    if(req.validCaptcha) {
-        res.send('Captcha is valid');
-    } else {
-        res.send(`Captcha is invalid: ${req.invalidReason}`);
-    }
-})
+app.post("/submit", (req, res) => {
+  if (req.validCaptcha) {
+    res.send("Captcha is valid");
+  } else {
+    res.send(`Captcha is invalid: ${req.invalidReason}`);
+  }
+});
 
+app.get("/sandbox", (req, res) => {
+  const settings = {
+    generator: {
+      captcha: {
+        length: Number(req.query.captchaLength) || 5,
+      },
+      strokes: {
+        count: Number(req.query.strokeCount) || 2,
+        width: Number(req.query.strokeWidth) || 2,
+      },
+      noise: {
+        density: Number(req.query.noiseDensity) || 0.01,
+      },
+      text: {
+        font: req.query.textFont || "bold 40px Roboto",
+        characters:
+          req.query.textCharacters || "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
+      },
+    },
+  };
 
-
-
-app.get('/sandbox', (req, res) => {
-    const settings = {
-        generator: {
-            captcha: {
-                length: Number(req.query.captchaLength) || 5
-            },
-            strokes: {
-                count: Number(req.query.strokeCount) || 2,
-                width: Number(req.query.strokeWidth) || 2
-            },
-            noise: {
-                density: Number(req.query.noiseDensity) || 0.01
-            },
-            text: {
-                font: req.query.textFont || "bold 40px Roboto",
-                characters: req.query.textCharacters || "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-            }
-        }
-    };
-
-    const captcha = easyCaptcha.generator.generate(settings.generator);
-    res.send(`
+  const captcha = easyCaptcha.generator.generate(settings.generator);
+  res.send(`
         <form action="/submit" method="post">
             <img src="${captcha.image}" />
             <input type="text" name="captcha" placeholder="Enter the code" />
@@ -140,5 +149,5 @@ app.get('/sandbox', (req, res) => {
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log('Server started');
-})
+  console.log("Server started");
+});

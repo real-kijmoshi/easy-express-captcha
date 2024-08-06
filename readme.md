@@ -18,23 +18,34 @@ npm install easy-express-captcha
 ## Usage
 
 ```javascript
-const express = require('express');
-const captcha = require('easy-express-captcha');
+const express = require("express");
+const captcha = require("easy-express-captcha");
+const session = require("express-session");
 const app = express();
 
-app.use(express.urlencoded({ extended: false }));
-app.use(captcha({
-    generator: {
-        captcha: {
-            length: 5
-        }
-    },
-    inputName: "captcha" // For more info, check the options section
-}));
+app.use(
+  session({
+    secret: process.env.SECRET ?? "secret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
-app.get('/', (req, res) => {
-    const captcha = req.generateCaptcha();
-    res.send(`
+app.use(express.urlencoded({ extended: false }));
+app.use(
+  captcha({
+    generator: {
+      captcha: {
+        length: 5,
+      },
+    },
+    inputName: "captcha", // For more info, check the options section
+  })
+);
+
+app.get("/", (req, res) => {
+  const captcha = req.generateCaptcha();
+  res.send(`
         <form action="/submit" method="post">
             ${captcha}
             <button type="submit">Submit</button>
@@ -42,16 +53,16 @@ app.get('/', (req, res) => {
     `);
 });
 
-app.post('/submit', (req, res) => {
-    if (req.validCaptcha) {
-        res.send('Captcha is correct');
-    } else {
-        res.send('Captcha is incorrect');
-    }
+app.post("/submit", (req, res) => {
+  if (req.validCaptcha) {
+    res.send("Captcha is correct");
+  } else {
+    res.send("Captcha is incorrect");
+  }
 });
 
 app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+  console.log("Server is running on port 3000");
 });
 ```
 
@@ -64,39 +75,49 @@ app.listen(3000, () => {
 ### Generator Options
 
 #### canvas
+
 - `width`: The width of the captcha. Default is 200.
 - `height`: The height of the captcha. Default is 100.
 
 #### captcha
+
 - `length`: The length of the captcha. Default is 6.
 - `spacing`:
   - `min`: The minimum spacing between characters. Default is 30.
   - `max`: The maximum spacing between characters. Default is 40.
 
 #### colors
+
 - `background`: The background color of the captcha. Default is random.
 - `text`: The text color of the captcha. Default is random.
 - `noise`: The noise color of the captcha. Default is random.
 - `strokes`: The strokes color of the captcha. Default is [random, random, random].
 
 #### text
+
 - `font`: The font of the captcha. Default is 'bold 36px Arial'.
 - `characters`: The characters to use in the captcha. Default is 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'.
 
 #### noise
+
 - `density`: The density of the noise. Default is 0.3.
 - `curveCount`: The number of curves in the noise. Default is 10.
 
 #### strokes
+
 - `count`: The number of strokes in the captcha. Default is 4.
 - `width`: The width of the strokes. Default is 2.
 
 ### Middleware Options
 
 - `inputName`: The name of the input field. Default is 'captcha'.
-- `honeypot`: 
+- `honeypot`:
   - `enabled`: Enable honeypot fields. Default is false.
   - `inputNames`: Array of honeypot input names. Default is ['i am a robot'].
+- `refresh`:
+  - `enabled`: Enable refresh button. Default is true.
+  - `path`: The path to the refresh button. Default is '/refresh'.
+
 
 ## License
 

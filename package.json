@@ -1,6 +1,6 @@
 {
   "name": "easy-express-captcha",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "A simple captcha generator for express",
   "main": "index.js",
   "repository": {
@@ -19,11 +19,12 @@
     "email": "dev@kijmoshi.xyz"
   },
   "license": "MIT",
-  "dependencies": {
-    "canvas": "^2.11.2"
-  },
   "devDependencies": {
     "easy-express-captcha": "^0.9.3",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-session": "^1.18.0"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
   }
 }
